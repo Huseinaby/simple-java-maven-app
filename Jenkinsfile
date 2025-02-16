@@ -1,4 +1,7 @@
 node {
+    stage('Checkout') {
+        checkout scm
+    }
     stage('Build') {
         docker.image('maven:3.9.0').inside('-v /root/.m2:/root/.m2') {
             echo 'Building...'
@@ -14,5 +17,5 @@ node {
         }
     }
 
-    
+
 }
