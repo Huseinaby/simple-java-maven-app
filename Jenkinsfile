@@ -13,6 +13,4 @@ node {
             junit 'target/surefire-reports/*.xml'
         }
     }
-    
-    }
 }
