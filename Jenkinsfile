@@ -3,7 +3,7 @@ node {
         checkout scm
     }
     stage('Build') {
-        docker.image('maven:3.9.0').inside('-v /root/.m2:/root/.m2') {
+        docker.image('maven:latest').inside('-v /root/.m2:/root/.m2') {
             echo 'Building...'
             sh 'mvn -B -DskipTests clean package'
         }
