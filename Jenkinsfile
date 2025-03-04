@@ -25,7 +25,7 @@ node {
         }
     }
     stage('Deploy') {
-        docker.image('maven:latest').inside('-v /root/.m2:/root/.m2') {
+     {
             echo 'Deploying ...'
             
              echo 'Uploading JAR to EC2...'
