@@ -1,7 +1,3 @@
-def ssh_key = '/var/jenkins_home/Java-maven-app.pem'
-def ec2_user = 'ubuntu'
-def ec2_ip = '52.221.204.144'  
-
 node {
     stage('Checkout') {
         checkout scm
@@ -25,21 +21,27 @@ node {
         }
     }
     stage('Deploy') {
-        docker.image('maven:latest').inside('-v /var/jenkins_home/') {
-            echo 'Deploying ...'
-            
-             echo 'Uploading JAR to EC2...'
-        sh """scp -i "${ssh_key}" -o StrictHostKeyChecking=no target/my-app-1.0-SNAPSHOT.jar ${ec2_user}@${ec2_ip}:/home/ubuntu/
-        """
-
-        echo 'Running app on EC2...'
+    docker.image('maven:latest').inside('-v /root/.m2:/root/.m2') {
+        echo 'Deploying to EC2...'
+        
+        def ec2User = 'ubuntu'  // Default user Ubuntu EC2
+        def ec2Host = '52.221.204.144' // Ganti dengan IP publik EC2 kamu
+        def pemKey = '/var/jenkins_home/Java-maven-app.pem' // Simpan key di Jenkins server
+        def jarFile = 'target/my-app-1.0-SNAPSHOT.jar' // Ganti sesuai nama file JAR hasil build
+        
         sh """
-            ssh -i "${ssh_key}" -o StrictHostKeyChecking=no ${ec2_user}@${ec2_ip} '
-                nohup java -jar /home/ubuntu/my-app-1.0-SNAPSHOT.jar > app.log 2>&1 &
+            chmod 400 ${pemKey}
+            
+            # Kirim JAR ke EC2
+            scp -i ${pemKey} ${jarFile} ${ec2User}@${ec2Host}:/home/${ec2User}/app.jar
+            
+            # Jalankan aplikasi di EC2
+            ssh -i ${pemKey} ${ec2User}@${ec2Host} '
+                pkill -f app.jar || true
+                nohup java -jar /home/${ec2User}/app.jar > app.log 2>&1 &
             '
         """
-
-            sleep time: 1, unit: 'MINUTES'
-        }
     }
+}
+
 }
