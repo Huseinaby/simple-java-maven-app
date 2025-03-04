@@ -1,4 +1,4 @@
-def ssh_key = 'Java-maven-app.pem'
+def ssh_key = '/var/jenkins_home/Java-maven-app.pem'
 def ec2_user = 'ubuntu'
 def ec2_ip = '52.221.204.144'  
 
