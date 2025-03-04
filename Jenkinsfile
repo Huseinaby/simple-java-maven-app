@@ -25,7 +25,7 @@ node {
         }
     }
     stage('Deploy') {
-     {
+     steps {
             echo 'Deploying ...'
             
              echo 'Uploading JAR to EC2...'
