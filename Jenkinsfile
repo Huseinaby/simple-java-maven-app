@@ -1,4 +1,4 @@
-def ssh_key = '/var/jenkins_home/Java-maven-app.pem'
+def ssh_key = 'Java-maven-app.pem'
 def ec2_user = 'ubuntu'
 def ec2_ip = '52.221.204.144'  
 
@@ -25,7 +25,7 @@ node {
         }
     }
     stage('Deploy') {
-        docker.image('maven:latest').inside('-v /root/.m2:/root/.m2 -v /var/jenkins_home/Java-maven-app.pem:/root/Java-maven-app.pem') {
+        docker.image('maven:latest').inside('-v /var/jenkins_home/') {
             echo 'Deploying ...'
             
              echo 'Uploading JAR to EC2...'
