@@ -25,21 +25,22 @@ node {
         }
     }
     stage('Deploy') {
-     steps {
-            echo 'Deploying ...'
-            
-             echo 'Uploading JAR to EC2...'
-        sh """scp -i "${ssh_key}" -o StrictHostKeyChecking=no target/my-app-1.0-SNAPSHOT.jar ${ec2_user}@${ec2_ip}:/home/ubuntu/
+    steps {
+        echo 'Deploying ...'
+
+        echo 'Uploading JAR to EC2...'
+        sh """
+            scp -i /var/jenkins_home/Java-maven-app.pem -o StrictHostKeyChecking=no target/my-app-1.0-SNAPSHOT.jar ubuntu@${ec2_ip}:/home/ubuntu/
         """
 
         echo 'Running app on EC2...'
         sh """
-            ssh -i "${ssh_key}" -o StrictHostKeyChecking=no ${ec2_user}@${ec2_ip} '
+            ssh -i /var/jenkins_home/Java-maven-app.pem -o StrictHostKeyChecking=no ubuntu@${ec2_ip} '
                 nohup java -jar /home/ubuntu/my-app-1.0-SNAPSHOT.jar > app.log 2>&1 &
             '
         """
 
-            sleep time: 1, unit: 'MINUTES'
-        }
+        sleep time: 1, unit: 'MINUTES'
     }
+}
 }
