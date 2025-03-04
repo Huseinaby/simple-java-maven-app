@@ -25,7 +25,7 @@ node {
         }
     }
     stage('Deploy') {
-        docker.image('maven:latest') {
+        docker.image('maven:latest').inside('-v /root/.m2:/root/.m2 -v /var/jenkins_home/Java-maven-app.pem:/root/Java-maven-app.pem') {
             echo 'Deploying ...'
             
              echo 'Uploading JAR to EC2...'
