@@ -22,7 +22,7 @@ node {
 
             // Upload JAR file to EC2
             sh """
-                scp -i \$SSH_KEY -o StrictHostKeyChecking=no target/*.jar ec2-user@${ec2Ip}:~/app/${appName}
+                scp -i \$SSH_KEY -o StrictHostKeyChecking=no target/*.jar ubuntu@${ec2Ip}:~/app/${appName}
             """
 
             // Restart application on EC2
