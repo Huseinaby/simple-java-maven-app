@@ -20,19 +20,22 @@ node {
     }
 
     stage('Build Docker Image') {
-        withCredentials([usernamePassword(credentialsId: 'docker-hub-user', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-            sh '''
-            cp target/*.jar app.jar
-            cat > Dockerfile <<EOF
-            FROM openjdk:11-jre-slim
-            COPY app.jar /app.jar
-            ENTRYPOINT ["java", "-jar", "/app.jar"]
-            EOF
+    withCredentials([usernamePassword(credentialsId: 'docker-hub-user', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+        sh '''
+        ls -lah target/
+        cp target/*.jar app.jar
+        ls -lah app.jar
 
-            docker build -t $USER/hello-world-java-app:latest .
-            '''
-        }
+        cat > Dockerfile <<EOF
+        FROM openjdk:11-jre-slim
+        COPY app.jar /app.jar
+        ENTRYPOINT ["java", "-jar", "/app.jar"]
+        EOF
+
+        docker build -t $USER/hello-world-java-app:latest .
+        '''
     }
+}
 
     stage('Push to Docker Hub') {
         withCredentials([usernamePassword(credentialsId: 'docker-hub-user', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
