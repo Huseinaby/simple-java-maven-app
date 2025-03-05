@@ -38,8 +38,6 @@ node {
     }
 }
 
-}
-
     stage('Push to Docker Hub') {
         withCredentials([usernamePassword(credentialsId: 'docker-hub-user', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
             sh '''
