@@ -16,30 +16,23 @@ node {
         }
     }
     stage('Deploy') {
-    agent {
-        label 'master'
-    }
-    steps {
         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
-            script {
-                def ec2Ip = "52.221.204.144"
-                def appName = "my-app.jar"
+            def ec2Ip = "52.221.204.144"
+            def appName = "my-app.jar"
 
-                // Kirim file ke EC2
-                sh """
-                    scp -i \$SSH_KEY -o StrictHostKeyChecking=no target/*.jar ec2-user@${ec2Ip}:~/app/${appName}
-                """
+            // Upload JAR file to EC2
+            sh """
+                scp -i \$SSH_KEY -o StrictHostKeyChecking=no target/*.jar ec2-user@${ec2Ip}:~/app/${appName}
+            """
 
-                // Jalankan aplikasi di EC2
-                sh """
-                    ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ec2-user@${ec2Ip} << EOF
-                    pkill -f ${appName} || true
-                    nohup java -jar ~/app/${appName} > ~/app/app.log 2>&1 &
-                    EOF
-                """
-            }
+            // Restart application on EC2
+            sh """
+                ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ec2-user@${ec2Ip} << EOF
+                pkill -f ${appName} || true
+                nohup java -jar ~/app/${appName} > ~/app/app.log 2>&1 &
+                EOF
+            """
         }
     }
-}
 
 }
