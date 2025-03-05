@@ -15,67 +15,31 @@ node {
             junit 'target/surefire-reports/*.xml'
         }
     }
-    stage('Manual Approval') {
-        input message: 'Lanjutkan ke tahap Deploy?', ok: 'Proceed'
+    stage('Deploy') {
+    agent {
+        label 'master'
     }
+    steps {
+        withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+            script {
+                def ec2Ip = "52.221.204.144"
+                def appName = "my-app.jar"
 
-    stage('Build Docker Image') {
-    withCredentials([usernamePassword(credentialsId: 'docker-hub-user', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-        sh '''
-        ls -lah target/
-        cp target/my-app-1.0-SNAPSHOT.jar app.jar
-        ls -lah app.jar
-        '''
-        sh '''
-        cat > Dockerfile <<EOF
-        FROM openjdk:11-jre-slim
-        COPY app.jar /app.jar
-        ENTRYPOINT ["java", "-jar", "/app.jar"]
-        EOF
-        '''
-        sh '''
-        docker build -t $USER/hello-world-java-app:latest .
-        docker images
-        '''
+                // Kirim file ke EC2
+                sh """
+                    scp -i \$SSH_KEY -o StrictHostKeyChecking=no target/*.jar ec2-user@${ec2Ip}:~/app/${appName}
+                """
 
+                // Jalankan aplikasi di EC2
+                sh """
+                    ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ec2-user@${ec2Ip} << EOF
+                    pkill -f ${appName} || true
+                    nohup java -jar ~/app/${appName} > ~/app/app.log 2>&1 &
+                    EOF
+                """
+            }
+        }
     }
 }
 
-    stage('Push to Docker Hub') {
-        withCredentials([usernamePassword(credentialsId: 'docker-hub-user', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-            sh '''
-            echo $PASS | docker login -u $USER --password-stdin
-            docker push $USER/hello-world-java-app:latest
-            '''
-        }
-    }
-
-    stage('Deploy to EC2') {
-        sshagent(['ec2-ssh-key']) {
-            sh '''
-            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP << 'EOF'
-            
-            if ! command -v docker &> /dev/null; then
-                echo "Docker tidak ditemukan, menginstal Docker..."
-                sudo apt update
-                sudo apt install -y docker.io
-                sudo systemctl enable docker
-                sudo systemctl start docker
-            fi
-
-            sudo docker pull $USER/hello-world-java-app:latest
-
-            docker ps -a | grep hello-world-java-container && docker stop hello-world-java-container && docker rm hello-world-java-container || echo "Container not found, skipping removal."
-
-            sudo docker run -d --name hello-world-java-container -p 8080:8080 $USER/hello-world-java-app:latest
-
-            echo "Container sudah berjalan di EC2"
-EOF
-            '''
-        }
-    }
-
-    stage('Done') {
-        echo 'Pipeline selesai'
-    }
 }
