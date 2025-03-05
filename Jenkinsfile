@@ -27,7 +27,7 @@ node {
 
             // Restart application on EC2
             sh """
-                ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ec2-user@${ec2Ip} << EOF
+                ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ubuntu@${ec2Ip} << EOF
                 pkill -f ${appName} || true
                 nohup java -jar ~/app/${appName} > ~/app/app.log 2>&1 &
                 EOF
