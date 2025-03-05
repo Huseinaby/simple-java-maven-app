@@ -23,7 +23,7 @@ node {
     withCredentials([usernamePassword(credentialsId: 'docker-hub-user', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
         sh '''
         ls -lah target/
-        cp target/*.jar app.jar
+        cp target/my-app-1.0-SNAPSHOT.jar app.jar
         ls -lah app.jar
 
         cat > Dockerfile <<EOF
@@ -33,8 +33,11 @@ node {
         EOF
 
         docker build -t $USER/hello-world-java-app:latest .
+        docker images
         '''
     }
+}
+
 }
 
     stage('Push to Docker Hub') {
