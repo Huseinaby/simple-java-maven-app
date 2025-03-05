@@ -26,14 +26,15 @@ node {
         cp target/my-app-1.0-SNAPSHOT.jar app.jar
         ls -lah app.jar
         '''
-        sh -c 'cat > Dockerfile <<EOF
+        sh -c "cat > Dockerfile <<EOF
         FROM openjdk:11-jre-slim
         COPY app.jar /app.jar
         ENTRYPOINT ["java", "-jar", "/app.jar"]
-        EOF
+        EOF"
+        sh '''
         docker build -t $USER/hello-world-java-app:latest .
         docker images
-        '
+        '''
 
     }
 }
