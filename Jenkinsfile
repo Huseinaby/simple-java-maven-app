@@ -21,18 +21,17 @@ node {
             def appName = "my-app.jar"
 
             // Upload JAR file to EC2
-            sh """
+            sh  """
                 scp -i \$SSH_KEY -o StrictHostKeyChecking=no target/*.jar ubuntu@${ec2Ip}:~/app/${appName}
-            """
+                """
 
             // Restart application on EC2
             sh """
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@52.221.204.144 << 'EOF'
-    pkill -f my-app.jar || true
-    nohup java -jar ~/app/my-app.jar > ~/app/app.log 2>&1 &
-EOF
-
-            """
+                pkill -f my-app.jar || true
+                nohup java -jar ~/app/my-app.jar > ~/app/app.log 2>&1 &
+                EOF
+                """
         }
     }
 
