@@ -29,8 +29,7 @@ node {
             sh """
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@52.221.204.144 << 'EOF'
                 pkill -f my-app.jar || true
-                nohup java -jar ~/app/my-app.jar > ~/app/app.log 2>&1 &
-                EOF
+                nohup java -jar ~/app/my-app.jar > ~/app/app.log 2>&1 & EOF
                 """
         }
     }
