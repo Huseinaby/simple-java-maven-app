@@ -15,7 +15,19 @@ node {
             junit 'target/surefire-reports/*.xml'
         }
     }
+    stage('Manual Approval') {
+        docker.image('maven:latest').inside('-v /root/.m2:/root/.m2') {
+            input message: 'Lanjutkan ke tahap Deploy?'
+        }
+    }
     stage('Deploy') {
+        docker.image('maven:latest').inside('-v /root/.m2:/root/.m2') {
+            echo 'Deploying ...'
+            sh './jenkins/scripts/deliver.sh'
+            sleep time: 1, unit: 'MINUTES'
+        }
+    }
+    stage('Deploy to EC2') {
         withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
             def ec2Ip = "52.221.204.144"
             def appName = "my-app.jar"
